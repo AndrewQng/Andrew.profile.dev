@@ -28,13 +28,15 @@
         }
     </script>
     <style>
-        /* Ẩn hoàn toàn con trỏ mặc định để dùng ảnh động bằng JS */
-        * {
-            cursor: none !important;
+        /* Ẩn hoàn toàn con trỏ mặc định để dùng ảnh động bằng JS (Chỉ áp dụng trên máy tính) */
+        @media (pointer: fine) {
+            * {
+                cursor: none !important;
+            }
         }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen font-sans">
+<body class="flex items-center justify-center min-h-screen font-sans p-4 sm:p-8 overflow-x-hidden">
     <!-- Con trỏ chuột động bằng JavaScript -->
     <img id="custom-cursor" src="default.gif" alt="Cursor" class="fixed pointer-events-none z-[10000] w-8 h-8" style="display: none; top: -16px; left: -16px; will-change: transform;">
 
@@ -42,15 +44,15 @@
         <source src="Castorice1.webm" type="video/webm">
     </video>
 
-    <div class="container bg-purple-900/40 backdrop-blur-md border border-purple-400/20 p-10 rounded-xl shadow-2xl text-center max-w-md w-11/12">
-        <h1 class="text-3xl sm:text-4xl font-extrabold text-white font-['Nunito'] tracking-wide drop-shadow-lg whitespace-nowrap">Nguyễn Mạnh Quyền</h1>
+    <div class="container bg-purple-900/40 backdrop-blur-md border border-purple-400/20 p-6 sm:p-10 rounded-xl shadow-2xl text-center max-w-md w-full sm:w-11/12 relative z-10 mb-20 sm:mb-0 mt-8 sm:mt-0">
+        <h1 class="text-2xl sm:text-4xl font-extrabold text-white font-['Nunito'] tracking-wide drop-shadow-lg sm:whitespace-nowrap leading-tight">Nguyễn Mạnh Quyền</h1>
         <h2 class="text-[1.75rem] sm:text-[2rem] font-black font-['Nunito'] tracking-[0.4em] uppercase mt-3 mb-8 text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-cyan-400 to-fuchsia-500 bg-[length:200%_auto] animate-shine drop-shadow-[0_0_15px_rgba(217,70,239,0.8)]">
             Andrew
         </h2>
         <p class="text-purple-100 mb-8 leading-relaxed font-['Nunito'] font-semibold tracking-wide">
             Software Developer | Student at HUCE<br>Tôi yêu Castorice
         </p>
-        <div class="links flex justify-center gap-6">
+        <div class="links flex justify-center gap-4 sm:gap-6 flex-wrap">
             <a href="https://github.com/AndrewQng" class="flex items-center justify-center bg-purple-800/50 border border-purple-400/30 text-purple-200 hover:text-white p-3.5 rounded-full transition duration-300 ease-in-out transform hover:-translate-y-1 shadow-lg hover:shadow-purple-500/50 backdrop-blur-sm" title="GitHub" target="_blank" rel="noopener noreferrer">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-6 h-6">
                     <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8Z" />
@@ -113,7 +115,7 @@
     </div>
 
     <!-- Spotify Widget -->
-    <div id="spotify-widget" class="fixed bottom-4 right-4 bg-purple-900/50 backdrop-blur-md border border-purple-400/30 p-3 rounded-xl shadow-xl transition-all duration-500 transform translate-y-20 opacity-0 pointer-events-none flex items-center gap-3 cursor-pointer hover:scale-[1.02]">
+    <div id="spotify-widget" class="fixed bottom-4 left-4 right-4 sm:left-auto bg-purple-900/50 backdrop-blur-md border border-purple-400/30 p-3 rounded-xl shadow-xl transition-all duration-500 transform translate-y-20 opacity-0 pointer-events-none flex items-center gap-3 cursor-pointer hover:scale-[1.02] z-50">
         <img id="spotify-album-art" src="" alt="Album Art" class="w-14 h-14 rounded-md border border-purple-400/30 shadow-md">
         <div class="text-left flex-1 min-w-[150px] max-w-[200px]">
             <p class="text-green-400 text-[10px] font-bold uppercase tracking-wider mb-0.5 flex items-center gap-1">
@@ -277,6 +279,9 @@
         let currentCursorSrc = 'default.gif'; // Lưu trạng thái để tránh phải đọc DOM liên tục
         
         document.addEventListener('mousemove', (e) => {
+            // Tắt custom cursor trên thiết bị di động (cảm ứng)
+            if (window.matchMedia("(pointer: coarse)").matches) return;
+            
             cursor.style.display = 'block';
             // Dùng transform thay vì left/top để GPU xử lý, giúp di chuột mượt mà không bị giật lag
             cursor.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
