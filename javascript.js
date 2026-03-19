@@ -37,25 +37,45 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             const slashTrail = document.getElementById('slash-trail');
             if (slashTrail) slashTrail.classList.add('animate-slash-trail');
-        }, 350);
+        }, 1000);
 
         setTimeout(() => {
             andrewText.classList.remove('opacity-0');
             andrewText.classList.add('animate-text-reveal');
-        }, 1050);
+        }, 1600);
     }, andrewDelay);
 
-    const namespace = 'andrew_stats_perfect_v1';
+    const namespace = 'andrew_stats_perfect_v2'; // Đổi đuôi thành v2 để tạo bộ đếm mới hoàn toàn
     
-    fetch(`https://api.counterapi.dev/v1/${namespace}/views/up`)
+    // Lấy IP người dùng để đếm lượt xem duy nhất (Unique Views)
+    fetch('https://api.ipify.org?format=json')
         .then(res => res.json())
-        .then(data => {
-            if (data && data.count !== undefined) {
-                document.getElementById('stat-views').innerText = data.count.toLocaleString();
-            } else {
-                document.getElementById('stat-views').innerText = '1';
-            }
-        }).catch(() => { document.getElementById('stat-views').innerText = '1'; });
+        .then(ipData => {
+            // Chuyển địa chỉ IP (IPv4, IPv6) thành dạng chuỗi an toàn để làm key (VD: 192.168.1.1 -> ip_192_168_1_1)
+            const safeIpKey = 'ip_' + ipData.ip.replace(/[\.\:]/g, '_'); 
+            
+            // Kiểm tra IP này đã từng truy cập chưa
+            fetch(`https://api.counterapi.dev/v1/${namespace}/${safeIpKey}`)
+                .then(res => res.json())
+                .then(checkData => {
+                    if (checkData && checkData.count > 0) {
+                        // IP đã xem rồi -> Chỉ lấy tổng số view hiện tại để hiển thị, KHÔNG CỘNG THÊM
+                        fetch(`https://api.counterapi.dev/v1/${namespace}/views`).then(r => r.json()).then(d => document.getElementById('stat-views').innerText = (d.count || 1).toLocaleString()).catch(() => document.getElementById('stat-views').innerText = '1');
+                    } else {
+                        // IP mới -> Đánh dấu IP này và CỘNG THÊM 1 vào view tổng
+                        fetch(`https://api.counterapi.dev/v1/${namespace}/${safeIpKey}/up`).catch(()=> {});
+                        fetch(`https://api.counterapi.dev/v1/${namespace}/views/up`).then(r => r.json()).then(d => document.getElementById('stat-views').innerText = (d.count || 1).toLocaleString()).catch(() => document.getElementById('stat-views').innerText = '1');
+                    }
+                })
+                .catch(() => {
+                    // Fallback 1: Bị chặn CORS khi kiểm tra IP, tự động lấy view tổng
+                    fetch(`https://api.counterapi.dev/v1/${namespace}/views`).then(r => r.json()).then(d => document.getElementById('stat-views').innerText = (d.count || 1).toLocaleString()).catch(() => document.getElementById('stat-views').innerText = '1');
+                });
+        })
+        .catch(() => {
+            // Fallback 2: Lỗi mạng không lấy được IP thì lấy tổng số view
+            fetch(`https://api.counterapi.dev/v1/${namespace}/views`).then(r => r.json()).then(d => document.getElementById('stat-views').innerText = (d.count || 1).toLocaleString()).catch(() => document.getElementById('stat-views').innerText = '1');
+        });
 
     let globalClicks = 0;
     fetch(`https://api.counterapi.dev/v1/${namespace}/clicks/up`)
