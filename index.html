@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="overflow-hidden">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -98,14 +98,38 @@
             animation: slash-trail-anim 0.7s ease-out forwards;
         }
 
-        @keyframes text-reveal-by-slash {
-            from { 
-                /* Cho phép dư ra 150px ở trên, dưới, trái. Bị cắt 100% ở bên phải để làm hiệu ứng quét */
-                clip-path: inset(-150px 100% -150px -150px);
+        @keyframes text-flash-bang {
+            0% {
+                opacity: 0;
+                transform: scale(0.9);
             }
-            to { 
-                /* Mở rộng không gian ra 150px ở tất cả các hướng để bóng sáng tỏa ra thoải mái */
-                clip-path: inset(-150px -150px -150px -150px);
+            15% {
+                opacity: 1;
+                transform: scale(1.15);
+                filter: brightness(2.5);
+                text-shadow: 
+                    0 0 20px #ffffff, 
+                    0 0 40px #ffffff, 
+                    0 0 80px #ffffff, 
+                    0 0 120px #fef08a, 
+                    3px 3px 0px #ffffff, 
+                    6px 6px 0px #ffffff, 
+                    9px 9px 0px #ffffff, 
+                    12px 12px 40px #ffffff;
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+                filter: brightness(1);
+                text-shadow: 
+                    0 0 0px rgba(254, 240, 138, 0), 
+                    0 0 0px rgba(254, 240, 138, 0), 
+                    0 0 0px rgba(254, 240, 138, 0), 
+                    0 0 0px rgba(254, 240, 138, 0), 
+                    3px 3px 0px #d946ef, 
+                    6px 6px 0px #a855f7, 
+                    9px 9px 0px #5806d4, 
+                    12px 12px 20px rgba(0,0,0,0.8);
             }
         }
 
@@ -136,8 +160,8 @@
 
         .animate-text-reveal {
             opacity: 1;
-            /* Hiện ra nhanh trong 0.4s, sau đó đợi thêm 0.6s (tổng 1s) rồi từ từ sáng loang ra trong 2.5s */
-            animation: text-reveal-by-slash 0.4s ease-out forwards, text-glow-spread 2.5s ease-in-out 0.6s forwards;
+            /* Nổ flash chói lòa chớp nhoáng trong 0.4s, sau đó từ từ loang sáng tím */
+            animation: text-flash-bang 0.4s cubic-bezier(0.1, 1, 0.1, 1) forwards, text-glow-spread 2.5s ease-in-out 0.4s forwards;
         }
 
         @media (max-height: 768px) {
@@ -154,7 +178,7 @@
         }
     </style>
 </head>
-<body class="grid grid-cols-1 lg:grid-cols-3 place-items-center min-h-[100dvh] font-sans p-3 sm:p-6 md:px-8 md:py-4 overflow-x-hidden">
+<body class="grid grid-cols-1 lg:grid-cols-3 place-items-center h-[100dvh] w-full font-sans p-3 sm:p-6 md:px-8 md:py-4 overflow-hidden overscroll-none">
     <img id="custom-cursor" src="default.gif" alt="Cursor" class="fixed pointer-events-none z-[10000] w-8 h-8" style="display: none; top: -16px; left: -16px; will-change: transform;">
 
     <img src="CastoriceBG.png" alt="Background" class="fixed top-0 left-0 w-full h-full object-cover -z-10 block sm:hidden">
@@ -167,16 +191,16 @@
     <div class="w-[95%] max-w-[26rem] sm:max-w-[480px] md:max-w-[560px] lg:max-w-[640px] xl:max-w-[720px] lg:col-start-3 lg:-translate-x-25 xl:-translate-x-40 relative z-10 mb-24 sm:mb-0 mt-12 sm:mt-0 flex flex-col gap-4">
         <div id="main-panel" class="bg-purple-900/60 sm:bg-purple-900/40 backdrop-blur-sm sm:backdrop-blur-md border border-purple-400/20 p-6 sm:p-8 md:p-10 min-h-[300px] sm:min-h-[350px] md:min-h-[390px] lg:min-h-[420px] xl:min-h-[460px] flex flex-col justify-between gap-4 rounded-xl shadow-2xl text-center w-full opacity-0 translate-y-8 transition-all duration-1000 ease-out hover:scale-[1.02]">
         
-        <div id="stats-container" class="absolute top-4 right-5 sm:top-5 sm:right-6 flex flex-col items-end gap-1.5 text-[10px] sm:text-xs text-purple-300/70 font-medium opacity-0 translate-y-8 transition-all duration-700 ease-out z-40">
-            <div class="flex items-center gap-1.5 transition-colors hover:text-purple-200" title="Lượt xem trang">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5 sm:w-4 sm:h-4">
+        <div id="stats-container" class="absolute top-3 right-3 sm:top-5 sm:right-6 flex flex-col items-end gap-1 sm:gap-1.5 text-[9px] sm:text-xs text-purple-300/70 font-medium opacity-0 translate-y-8 transition-all duration-700 ease-out z-40">
+            <div class="flex items-center gap-1 sm:gap-1.5 transition-colors hover:text-purple-200" title="Lượt xem trang">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3 sm:w-4 sm:h-4">
                     <path d="M10 12.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" />
                     <path fill-rule="evenodd" d="M.664 10.59a1.651 1.651 0 010-1.186A10.004 10.004 0 0110 3c4.257 0 7.893 2.66 9.336 6.41.147.381.146.804 0 1.186A10.004 10.004 0 0110 17c-4.257 0-7.893-2.66-9.336-6.41zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
                 </svg>
                 <span id="stat-views">Đang tải...</span>
             </div>
-            <div class="flex items-center gap-1.5 transition-colors hover:text-purple-200" title="Lượt click các liên kết">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5 sm:w-4 sm:h-4">
+            <div class="flex items-center gap-1 sm:gap-1.5 transition-colors hover:text-purple-200" title="Lượt click các liên kết">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3 sm:w-4 sm:h-4">
                     <path fill-rule="evenodd" d="M5.22 14.78a.75.75 0 001.06 0l7.22-7.22v5.69a.75.75 0 001.5 0v-7.5a.75.75 0 00-.75-.75h-7.5a.75.75 0 000 1.5h5.69l-7.22 7.22a.75.75 0 000 1.06z" clip-rule="evenodd" />
                 </svg>
                 <span id="stat-clicks">Đang tải...</span>
@@ -200,7 +224,7 @@
             </div>
         </div>
         
-        <p class="text-purple-100 mt-2 sm:mt-3 md:mt-4 text-sm sm:text-base leading-relaxed font-['Nunito'] font-semibold tracking-wide px-2">
+        <p class="text-purple-100 mt-6 sm:mt-3 md:mt-4 text-sm sm:text-base leading-relaxed font-['Nunito'] font-semibold tracking-wide px-2">
             Software Developer - Student at HUCE<br>Tôi yêu Castorice
         </p>
         <div class="links flex justify-center gap-3 sm:gap-4 md:gap-5 flex-wrap">
