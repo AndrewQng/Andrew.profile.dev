@@ -47,37 +47,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const namespace = 'andrew_stats_perfect_v3'; // Đổi sang v3 và gọi trực tiếp API
     
-    // Hàm tạo hiệu ứng đếm số chạy mượt mà
-    const animateValue = (obj, start, end, duration) => {
-        let startTimestamp = null;
-        const step = (timestamp) => {
-            if (!startTimestamp) startTimestamp = timestamp;
-            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-            // Thuật toán easing (chậm dần về cuối) để tạo cảm giác tự nhiên
-            const easeOut = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
-            obj.innerText = Math.floor(easeOut * (end - start) + start).toLocaleString();
-            if (progress < 1) window.requestAnimationFrame(step);
-        };
-        window.requestAnimationFrame(step);
-    };
-
-    const updateViewsAnimated = (count) => {
-        const el = document.getElementById('stat-views');
-        if (el) animateValue(el, 0, count, 2500); // Thời gian chạy là 2.5 giây
-    };
+    // Số liệu mặc định cộng thêm (để bù lại số view/click từ các bản cũ)
+    const baseViews = 150; 
+    const baseClicks = 42; 
     
     let globalViews = parseInt(localStorage.getItem('andrew_views') || '0');
     // Tăng lượt xem trực tiếp (không qua Proxy)
     fetch(`https://api.counterapi.dev/v1/${namespace}/views/up`)
         .then(res => res.json())
         .then(data => {
-            globalViews = Math.max(globalViews, data.count || 1);
+            globalViews = Math.max(globalViews, (data.count || 1) + baseViews);
             localStorage.setItem('andrew_views', globalViews);
-            updateViewsAnimated(globalViews);
+            document.getElementById('stat-views').innerText = globalViews.toLocaleString();
         })
         .catch(() => {
-            globalViews = Math.max(globalViews, 1);
-            updateViewsAnimated(globalViews);
+            globalViews = Math.max(globalViews, 1 + baseViews);
+            document.getElementById('stat-views').innerText = globalViews.toLocaleString();
         });
 
     let globalClicks = parseInt(localStorage.getItem('andrew_clicks') || '0');
@@ -89,12 +74,12 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .then(data => {
             if (data && data.count !== undefined) {
-                globalClicks = Math.max(globalClicks, data.count);
+                globalClicks = Math.max(globalClicks, data.count + baseClicks);
                 localStorage.setItem('andrew_clicks', globalClicks);
             }
-            animateValue(document.getElementById('stat-clicks'), 0, globalClicks, 2500); // Áp dụng cho cả Click
+            document.getElementById('stat-clicks').innerText = globalClicks.toLocaleString();
         }).catch(() => { 
-            animateValue(document.getElementById('stat-clicks'), 0, globalClicks, 2500);
+            document.getElementById('stat-clicks').innerText = globalClicks.toLocaleString();
         });
 
     socialLinks.forEach(link => {
