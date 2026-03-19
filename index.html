@@ -77,7 +77,8 @@
             }
             100% { /* Rút về và biến mất */
                 opacity: 0;
-                transform: translate(-140px, 280px) rotate(120deg) scale(0.8);
+                /* Thu nhỏ (scale 0.2) và không rơi xuống sâu để tránh tạo thanh cuộn */
+                transform: translate(-140px, 210px) rotate(120deg) scale(0.2);
             }
         }
 
@@ -279,12 +280,11 @@
                 }, 1500);
             }, andrewDelay);
 
-            // --- Hệ thống Đếm Lượt Xem & Click (Dữ liệu thực) ---
-            const namespace = 'andrew_profile_stats_real_2024'; // Tên định danh duy nhất cho web của bạn
-            const ts = new Date().getTime(); // Timestamp chống cache an toàn (không lỗi CORS)
+            // --- Hệ thống Đếm Lượt Xem & Click (Khắc phục độ trễ API bằng LocalStorage) ---
+            const namespace = 'andrew_profile_stats_final'; // Namespace mới để đếm lại sạch sẽ
             
             // Lấy dữ liệu và tăng lượt xem trang
-            fetch(`https://api.counterapi.dev/v1/${namespace}/views/up?_=${ts}`)
+            fetch(`https://api.counterapi.dev/v1/${namespace}/views/up`)
                 .then(res => res.json())
                 .then(data => {
                     if (data && data.count !== undefined) {
@@ -294,24 +294,41 @@
                     }
                 }).catch(() => { document.getElementById('stat-views').innerText = '-'; });
 
-            // Lấy số lượt click hiện tại
-            fetch(`https://api.counterapi.dev/v1/${namespace}/clicks?_=${ts}`)
+            // 1. Lấy lượt click từ bộ nhớ máy người dùng (hiện ngay lập tức, không bao giờ bị 0)
+            let localClicks = parseInt(localStorage.getItem('andrew_clicks_final')) || 0;
+            document.getElementById('stat-clicks').innerText = localClicks.toLocaleString();
+
+            // 2. Lấy số lượt click thực tế từ Server
+            fetch(`https://api.counterapi.dev/v1/${namespace}/clicks`)
                 .then(res => res.json())
                 .then(data => {
                     if (data && data.count !== undefined) {
-                        document.getElementById('stat-clicks').innerText = data.count.toLocaleString();
-                    } else {
-                        document.getElementById('stat-clicks').innerText = '0';
+                        // Nếu server có số lớn hơn (người khác vừa click), thì cập nhật
+                        if (data.count > localClicks) {
+                            localClicks = data.count;
+                            localStorage.setItem('andrew_clicks_final', localClicks);
+                            document.getElementById('stat-clicks').innerText = localClicks.toLocaleString();
+                        }
                     }
-                }).catch(() => { document.getElementById('stat-clicks').innerText = '0'; });
+                }).catch(() => {});
 
             // Lắng nghe sự kiện click vào các link mạng xã hội để đếm thật
             socialLinks.forEach(link => {
                 link.addEventListener('click', () => {
-                    fetch(`https://api.counterapi.dev/v1/${namespace}/clicks/up?_=${new Date().getTime()}`)
+                    // Tăng số ngay trên màn hình và lưu vào máy
+                    localClicks++;
+                    localStorage.setItem('andrew_clicks_final', localClicks);
+                    document.getElementById('stat-clicks').innerText = localClicks.toLocaleString();
+
+                    // Gửi lên server
+                    fetch(`https://api.counterapi.dev/v1/${namespace}/clicks/up`)
                         .then(res => res.json())
                         .then(data => {
-                            if (data && data.count !== undefined) document.getElementById('stat-clicks').innerText = data.count.toLocaleString();
+                            if (data && data.count !== undefined && data.count > localClicks) {
+                                localClicks = data.count;
+                                localStorage.setItem('andrew_clicks_final', localClicks);
+                                document.getElementById('stat-clicks').innerText = localClicks.toLocaleString();
+                            }
                         }).catch(() => {});
                 });
             });
