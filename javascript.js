@@ -51,18 +51,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const baseViews = 150; 
     const baseClicks = 42; 
     
-    let globalViews = parseInt(localStorage.getItem('andrew_views') || '0');
     // Tăng lượt xem trực tiếp (không qua Proxy)
     fetch(`https://api.counterapi.dev/v1/${namespace}/views/up`)
         .then(res => res.json())
         .then(data => {
-            globalViews = Math.max(globalViews, (data.count || 1) + baseViews);
-            localStorage.setItem('andrew_views', globalViews);
-            document.getElementById('stat-views').innerText = globalViews.toLocaleString();
+            const currentViews = (data.count || 1) + baseViews;
+            document.getElementById('stat-views').innerText = currentViews.toLocaleString();
         })
         .catch(() => {
-            globalViews = Math.max(globalViews, 1 + baseViews);
-            document.getElementById('stat-views').innerText = globalViews.toLocaleString();
+            document.getElementById('stat-views').innerText = (1 + baseViews).toLocaleString();
         });
 
     let globalClicks = parseInt(localStorage.getItem('andrew_clicks') || '0');
