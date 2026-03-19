@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     
     <script>
         tailwind.config = {
@@ -34,6 +35,84 @@
                 cursor: none !important;
             }
         }
+
+        /* Hiệu ứng chữ Pixel Arcade 3D nổi bật */
+        .arcade-effect {
+            font-family: 'Press Start 2P', cursive;
+            color: #ffffff; /* Trắng - Bạn có thể thay bằng mã màu khác ở đây */
+            /* Đổ bóng tầng 3D mang phong cách cyberpunk/retro */
+            text-shadow: /* Bỏ màu cam/hồng, thay bằng Fuchsia */
+                3px 3px 0px #d946ef, /* Lớp bóng 1: Fuchsia Neon */
+                6px 6px 0px #a855f7, /* Lớp bóng 2: Tím Neon */
+                9px 9px 0px #06b6d4, /* Lớp bóng 3: Xanh Cyan */
+                12px 12px 20px rgba(0,0,0,0.8);
+        }
+
+        /* --- Animation Lưỡi Hái Chém --- */
+        #weapon-scythe {
+            opacity: 0;
+            /* Đặt tâm xoay ở phần chuôi kiếm (góc dưới phải ảnh) để vung tự nhiên */
+            transform-origin: 85% 85%;
+            transform: translate(-150px, 150px) rotate(-30deg) scale(0.8);
+        }
+
+        @keyframes scythe-slash {
+            0% {
+                opacity: 0;
+                transform: translate(-230px, 200px) rotate(-30deg) scale(0.8);
+            }
+            25% { /* Vung lên cao bên trái chuẩn bị chém */
+                opacity: 1;
+                /* Vị trí bắt đầu chém sát hơn với điểm kết thúc */
+                transform: translate(-190px, 140px) rotate(15deg) scale(1.1);
+            }
+            45% { /* Quét mạnh qua phải, hướng lưỡi liềm chém ngang */
+                opacity: 1;
+                /* Quét một đoạn cực nhỏ (chỉ 15px theo trục X) */
+                transform: translate(-165px, 190px) rotate(65deg) scale(1.2);
+            }
+            60% { /* Dừng nhẹ lại sau khi chém để tạo lực */
+                opacity: 1;
+                transform: translate(-160px, 200px) rotate(75deg) scale(1.2);
+            }
+            100% { /* Rút về và biến mất */
+                opacity: 0;
+                transform: translate(-140px, 280px) rotate(120deg) scale(0.8);
+            }
+        }
+
+        .animate-scythe-slash {
+            animation: scythe-slash 1.5s ease-in-out forwards;
+        }
+
+        /* --- Animation Vệt Chém (Slash Trail) --- */
+        @keyframes slash-trail-anim {
+            /* Dịch vệt sáng sang phải một chút (translateX -170px) */
+            0% { opacity: 1; transform: translate(-170px, 35px) rotate(5deg) scaleX(0); }
+            40% { opacity: 1; transform: translate(-170px, 35px) rotate(5deg) scaleX(0.08); } /* Rút ngắn chiều dài vệt sáng hơn nữa */
+            100% { opacity: 0; transform: translate(-170px, 35px) rotate(5deg) scaleX(0.12) scaleY(5); filter: blur(8px); }
+        }
+
+        .animate-slash-trail {
+            animation: slash-trail-anim 0.5s ease-out forwards;
+        }
+
+        @keyframes text-reveal-by-slash {
+            from { 
+                clip-path: inset(0 100% 0 0); /* Quét mượt mà từ trái qua phải */
+                transform: scale(0.95);
+            }
+            to { 
+                clip-path: inset(0 0 0 0);
+                transform: scale(1);
+            }
+        }
+
+        .animate-text-reveal {
+            /* Animation sẽ làm nó hiện ra từ opacity 0 */
+            opacity: 1;
+            animation: text-reveal-by-slash 0.4s ease-out forwards;
+        }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen font-sans p-4 sm:p-8 overflow-x-hidden">
@@ -49,31 +128,35 @@
         <source src="Castorice1.webm" type="video/webm">
     </video>
 
-    <div class="container bg-purple-900/60 sm:bg-purple-900/40 backdrop-blur-sm sm:backdrop-blur-md border border-purple-400/20 p-6 sm:p-10 rounded-xl shadow-2xl text-center max-w-md w-full sm:w-11/12 relative z-10 mb-20 sm:mb-0 mt-8 sm:mt-0">
+    <div id="main-panel" class="container bg-purple-900/60 sm:bg-purple-900/40 backdrop-blur-sm sm:backdrop-blur-md border border-purple-400/20 p-6 sm:p-10 rounded-xl shadow-2xl text-center max-w-md w-full sm:w-11/12 relative z-10 mb-20 sm:mb-0 mt-8 sm:mt-0 opacity-0 translate-y-8 transition-all duration-1000 ease-out">
         <h1 class="text-2xl sm:text-4xl font-extrabold text-white font-['Nunito'] tracking-wide drop-shadow-lg sm:whitespace-nowrap leading-tight">Nguyễn Mạnh Quyền</h1>
-        <h2 class="text-[1.75rem] sm:text-[2rem] font-black font-['Nunito'] tracking-[0.4em] uppercase mt-3 mb-8 text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-cyan-400 to-fuchsia-500 bg-[length:200%_auto] animate-shine drop-shadow-[0_0_15px_rgba(217,70,239,0.8)]">
-            Andrew
-        </h2>
+        <!-- Container for Sword and Name Animation -->
+        <div class="relative flex justify-center items-center h-24 sm:h-32">
+            <img id="weapon-scythe" src="weapon.png" alt="Scythe" class="absolute w-64 h-64 sm:w-80 sm:h-80 z-20 pointer-events-none drop-shadow-2xl">
+            <h2 id="andrew-text" class="text-3xl sm:text-4xl tracking-widest uppercase my-6 arcade-effect opacity-0">
+                Andrew
+            </h2>
+        </div>
         <p class="text-purple-100 mb-8 leading-relaxed font-['Nunito'] font-semibold tracking-wide">
-            Software Developer | Student at HUCE<br>Tôi yêu Castorice
+            Software Developer - Student at HUCE<br>Tôi yêu Castorice
         </p>
         <div class="links flex justify-center gap-4 sm:gap-6 flex-wrap">
-            <a href="https://github.com/AndrewQng" class="flex items-center justify-center bg-purple-800/50 border border-purple-400/30 text-purple-200 hover:text-white p-3.5 rounded-full transition duration-300 ease-in-out transform hover:-translate-y-1 shadow-lg hover:shadow-purple-500/50 backdrop-blur-sm" title="GitHub" target="_blank" rel="noopener noreferrer">
+            <a href="https://github.com/AndrewQng" class="flex items-center justify-center bg-purple-800/50 border border-purple-400/30 text-purple-200 hover:text-white p-3.5 rounded-full transition-all duration-700 ease-out transform hover:-translate-y-1 shadow-lg hover:shadow-purple-500/50 backdrop-blur-sm opacity-0 translate-y-8" title="GitHub" target="_blank" rel="noopener noreferrer">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-6 h-6">
                     <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8Z" />
                 </svg>
             </a>
-            <a href="https://www.instagram.com/andrew.ngf?igsh=NXR0a2Fva3p4dm9z" class="flex items-center justify-center bg-purple-800/50 border border-purple-400/30 text-purple-200 hover:text-white p-3.5 rounded-full transition duration-300 ease-in-out transform hover:-translate-y-1 shadow-lg hover:shadow-purple-500/50 backdrop-blur-sm" title="Instagram" target="_blank" rel="noopener noreferrer">
+            <a href="https://www.instagram.com/andrew.ngf?igsh=NXR0a2Fva3p4dm9z" class="flex items-center justify-center bg-purple-800/50 border border-purple-400/30 text-purple-200 hover:text-white p-3.5 rounded-full transition-all duration-700 ease-out transform hover:-translate-y-1 shadow-lg hover:shadow-purple-500/50 backdrop-blur-sm opacity-0 translate-y-8" title="Instagram" target="_blank" rel="noopener noreferrer">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
                     <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.85s-.011 3.584-.069 4.85c-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07s-3.584-.012-4.85-.07c-3.252-.148-4.771-1.691-4.919-4.919-.058-1.265-.069-1.645-.069-4.85s.011-3.584.069-4.85c.149-3.225 1.664-4.771 4.919-4.919 1.266-.058 1.644-.07 4.85-.07zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948s.014 3.667.072 4.947c.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072s3.667-.014 4.947-.072c4.358-.2 6.78-2.618 6.98-6.98.059-1.281.073-1.689.073-4.948s-.014-3.667-.072-4.947c-.2-4.358-2.618-6.78-6.98-6.98-1.281-.059-1.689-.073-4.948-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.162 6.162 6.162 6.162-2.759 6.162-6.162-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4s1.791-4 4-4 4 1.79 4 4-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.44-.645 1.44-1.44s-.645-1.44-1.44-1.44z"/>
                 </svg>
             </a>
-            <a href="https://www.facebook.com/share/17gZdUmyM4/" class="flex items-center justify-center bg-purple-800/50 border border-purple-400/30 text-purple-200 hover:text-white p-3.5 rounded-full transition duration-300 ease-in-out transform hover:-translate-y-1 shadow-lg hover:shadow-purple-500/50 backdrop-blur-sm" title="Facebook" target="_blank" rel="noopener noreferrer">
+            <a href="https://www.facebook.com/share/17gZdUmyM4/" class="flex items-center justify-center bg-purple-800/50 border border-purple-400/30 text-purple-200 hover:text-white p-3.5 rounded-full transition-all duration-700 ease-out transform hover:-translate-y-1 shadow-lg hover:shadow-purple-500/50 backdrop-blur-sm opacity-0 translate-y-8" title="Facebook" target="_blank" rel="noopener noreferrer">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
                     <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"/>
                 </svg>
             </a>
-            <a href="https://open.spotify.com/user/31mjhrltj3i7fqkot2ookcegnqwa?si=52405a6d8fd04a4c" class="flex items-center justify-center bg-purple-800/50 border border-purple-400/30 text-purple-200 hover:text-white p-3.5 rounded-full transition duration-300 ease-in-out transform hover:-translate-y-1 shadow-lg hover:shadow-purple-500/50 backdrop-blur-sm" title="Spotify" target="_blank" rel="noopener noreferrer">
+            <a href="https://open.spotify.com/user/31mjhrltj3i7fqkot2ookcegnqwa?si=52405a6d8fd04a4c" class="flex items-center justify-center bg-purple-800/50 border border-purple-400/30 text-purple-200 hover:text-white p-3.5 rounded-full transition-all duration-700 ease-out transform hover:-translate-y-1 shadow-lg hover:shadow-purple-500/50 backdrop-blur-sm opacity-0 translate-y-8" title="Spotify" target="_blank" rel="noopener noreferrer">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
                     <path d="M12 2C6.477 2 2 6.477 2 12c0 5.523 4.477 10 10 10 5.522 0 10-4.477 10-10C22 6.477 17.522 2 12 2zm4.586 14.424c-.18.295-.563.387-.857.207-2.35-1.434-5.305-1.76-8.786-.963-.335.077-.67-.133-.746-.467-.077-.334.132-.67.466-.745 3.816-.874 7.07-.497 9.715 1.115.293.18.386.563.208.853zm1.22-3.245c-.226.367-.7.482-1.066.257-2.695-1.656-6.83-2.138-9.974-1.168-.41.124-.844-.105-.968-.515-.124-.41.106-.843.516-.968 3.593-1.107 8.163-.568 11.236 1.328.366.226.48.7.256 1.066zm.052-3.41c-3.226-1.914-8.543-2.09-11.616-1.157-.495.15-1.018-.128-1.168-.623-.15-.494.128-1.017.623-1.167 3.53-1.07 9.404-.866 13.115 1.337.445.264.59.838.327 1.282-.265.443-.838.588-1.282.327z"/>
                 </svg>
@@ -81,7 +164,7 @@
         </div>
 
         <!-- Discord Profile Card -->
-        <div class="mt-8 relative bg-purple-900/70 sm:bg-purple-900/50 backdrop-blur-sm sm:backdrop-blur-md border border-purple-400/30 rounded-xl overflow-hidden shadow-xl transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl hover:shadow-purple-500/40 group text-left">
+        <div id="discord-card-container" class="mt-8 relative bg-purple-900/70 sm:bg-purple-900/50 backdrop-blur-sm sm:backdrop-blur-md border border-purple-400/30 rounded-xl overflow-hidden shadow-xl transition-all duration-1000 ease-out hover:-translate-y-1 hover:shadow-2xl hover:shadow-purple-500/40 group text-left opacity-0 translate-y-8">
             <!-- Animated Background Glow -->
             <div class="absolute inset-0 bg-gradient-to-br from-fuchsia-500/10 via-cyan-400/5 to-purple-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0"></div>
             
@@ -122,7 +205,118 @@
                 </div>
             </div>
         </div>
+
+        <!-- Thống kê Lượt xem & Click -->
+        <div id="stats-container" class="mt-6 pt-5 border-t border-purple-500/20 flex justify-center gap-8 text-xs text-purple-300/70 font-medium opacity-0 translate-y-8 transition-all duration-700 ease-out">
+            <div class="flex items-center gap-1.5 transition-colors hover:text-purple-200" title="Lượt xem trang">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
+                    <path d="M10 12.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" />
+                    <path fill-rule="evenodd" d="M.664 10.59a1.651 1.651 0 010-1.186A10.004 10.004 0 0110 3c4.257 0 7.893 2.66 9.336 6.41.147.381.146.804 0 1.186A10.004 10.004 0 0110 17c-4.257 0-7.893-2.66-9.336-6.41zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                </svg>
+                <span id="stat-views">Đang tải...</span>
+            </div>
+            <div class="flex items-center gap-1.5 transition-colors hover:text-purple-200" title="Lượt click các liên kết">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
+                    <path fill-rule="evenodd" d="M5.22 14.78a.75.75 0 001.06 0l7.22-7.22v5.69a.75.75 0 001.5 0v-7.5a.75.75 0 00-.75-.75h-7.5a.75.75 0 000 1.5h5.69l-7.22 7.22a.75.75 0 000 1.06z" clip-rule="evenodd" />
+                </svg>
+                <span id="stat-clicks">Đang tải...</span>
+            </div>
+        </div>
     </div>
+
+    <script>
+        // Script for entry animation
+        document.addEventListener('DOMContentLoaded', () => {
+            const mainPanel = document.getElementById('main-panel');
+            const socialLinks = document.querySelectorAll('.links a');
+            const discordCard = document.getElementById('discord-card-container');
+
+            // 1. Animate main panel
+            setTimeout(() => {
+                mainPanel.classList.remove('opacity-0', 'translate-y-8');
+            }, 200);
+
+            // 2. Animate social links one by one
+            const panelAnimationTime = 200 + 600; // Start after panel is mostly visible
+            socialLinks.forEach((link, index) => {
+                setTimeout(() => {
+                    link.classList.remove('opacity-0', 'translate-y-8');
+                }, panelAnimationTime + (index * 150));
+            });
+
+            // 3. Animate discord card
+            const discordDelay = panelAnimationTime + (socialLinks.length * 150);
+            setTimeout(() => {
+                discordCard.classList.remove('opacity-0', 'translate-y-8');
+            }, discordDelay);
+
+            // 4. Animate thanh Thống kê
+            const statsContainer = document.getElementById('stats-container');
+            const statsDelay = discordDelay + 200; // Xuất hiện ngay sau thẻ Discord
+            setTimeout(() => {
+                if (statsContainer) {
+                    statsContainer.classList.remove('opacity-0', 'translate-y-8');
+                }
+            }, statsDelay);
+
+            // 5. Animate chữ "Andrew" pixel xuất hiện cuối cùng
+            const andrewText = document.getElementById('andrew-text');
+            const weaponScythe = document.getElementById('weapon-scythe');
+            const andrewDelay = statsDelay + 500; // Chờ thanh thống kê hiện ra một lúc
+            setTimeout(() => {
+                // 1. Bắt đầu animation chém lưỡi hái
+                weaponScythe.classList.add('animate-scythe-slash');
+
+                // 2. Sau một khoảng trễ ngắn, hiện chữ ra như thể được lưỡi hái chém tới
+                setTimeout(() => {
+                    andrewText.classList.remove('opacity-0');
+                    andrewText.classList.add('animate-text-reveal');
+                }, 400); // Thời gian này canh cho lưỡi hái đi được nửa đường
+
+                // 3. Ẩn hẳn lưỡi hái sau khi animation kết thúc (1.5s) để không tạo thanh cuộn trang
+                setTimeout(() => {
+                    weaponScythe.style.display = 'none';
+                }, 1500);
+            }, andrewDelay);
+
+            // --- Hệ thống Đếm Lượt Xem & Click (Dữ liệu thực) ---
+            const namespace = 'andrew_profile_stats_real_2024'; // Tên định danh duy nhất cho web của bạn
+            const ts = new Date().getTime(); // Timestamp chống cache an toàn (không lỗi CORS)
+            
+            // Lấy dữ liệu và tăng lượt xem trang
+            fetch(`https://api.counterapi.dev/v1/${namespace}/views/up?_=${ts}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.count !== undefined) {
+                        document.getElementById('stat-views').innerText = data.count.toLocaleString();
+                    } else {
+                        document.getElementById('stat-views').innerText = '0';
+                    }
+                }).catch(() => { document.getElementById('stat-views').innerText = '-'; });
+
+            // Lấy số lượt click hiện tại
+            fetch(`https://api.counterapi.dev/v1/${namespace}/clicks?_=${ts}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.count !== undefined) {
+                        document.getElementById('stat-clicks').innerText = data.count.toLocaleString();
+                    } else {
+                        document.getElementById('stat-clicks').innerText = '0';
+                    }
+                }).catch(() => { document.getElementById('stat-clicks').innerText = '0'; });
+
+            // Lắng nghe sự kiện click vào các link mạng xã hội để đếm thật
+            socialLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    fetch(`https://api.counterapi.dev/v1/${namespace}/clicks/up?_=${new Date().getTime()}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data && data.count !== undefined) document.getElementById('stat-clicks').innerText = data.count.toLocaleString();
+                        }).catch(() => {});
+                });
+            });
+        });
+    </script>
 
     <!-- Spotify Widget -->
     <div id="spotify-widget" class="fixed bottom-4 left-4 right-4 sm:left-auto bg-purple-900/70 sm:bg-purple-900/50 backdrop-blur-sm sm:backdrop-blur-md border border-purple-400/30 p-3 rounded-xl shadow-xl transition-all duration-500 transform translate-y-20 opacity-0 pointer-events-none flex items-center gap-3 cursor-pointer hover:scale-[1.02] z-50">
