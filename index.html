@@ -280,8 +280,8 @@
                 }, 1500);
             }, andrewDelay);
 
-            // --- Hệ thống Đếm Lượt Xem & Click (Khắc phục độ trễ API bằng LocalStorage) ---
-            const namespace = 'andrew_profile_stats_final'; // Namespace mới để đếm lại sạch sẽ
+            // --- Hệ thống Đếm Lượt Xem & Click (Thời gian thực 100% - Chống Cache) ---
+            const namespace = 'andrew_stats_perfect_v1'; // Khởi tạo không gian tên mới sạch sẽ
             
             // Lấy dữ liệu và tăng lượt xem trang
             fetch(`https://api.counterapi.dev/v1/${namespace}/views/up`)
@@ -290,44 +290,42 @@
                     if (data && data.count !== undefined) {
                         document.getElementById('stat-views').innerText = data.count.toLocaleString();
                     } else {
-                        document.getElementById('stat-views').innerText = '0';
+                        document.getElementById('stat-views').innerText = '1';
                     }
-                }).catch(() => { document.getElementById('stat-views').innerText = '-'; });
+                }).catch(() => { document.getElementById('stat-views').innerText = '1'; }); // Lỗi mạng cũng hiện 1
 
-            // 1. Lấy lượt click từ bộ nhớ máy người dùng (hiện ngay lập tức, không bao giờ bị 0)
-            let localClicks = parseInt(localStorage.getItem('andrew_clicks_final')) || 0;
-            document.getElementById('stat-clicks').innerText = localClicks.toLocaleString();
-
-            // 2. Lấy số lượt click thực tế từ Server
-            fetch(`https://api.counterapi.dev/v1/${namespace}/clicks`)
+            // Lấy lượt click: Dùng mẹo gọi /up để xuyên qua bộ nhớ đệm, sau đó gọi /down để trả lại số đúng
+            let globalClicks = 0;
+            fetch(`https://api.counterapi.dev/v1/${namespace}/clicks/up`)
                 .then(res => res.json())
                 .then(data => {
                     if (data && data.count !== undefined) {
-                        // Nếu server có số lớn hơn (người khác vừa click), thì cập nhật
-                        if (data.count > localClicks) {
-                            localClicks = data.count;
-                            localStorage.setItem('andrew_clicks_final', localClicks);
-                            document.getElementById('stat-clicks').innerText = localClicks.toLocaleString();
-                        }
+                        // Lấy số từ server trừ đi 1 lượt vừa cộng ảo
+                        globalClicks = Math.max(0, data.count - 1);
+                        document.getElementById('stat-clicks').innerText = globalClicks.toLocaleString();
+                        
+                        // Âm thầm trừ đi 1 trên máy chủ để cân bằng lại dữ liệu gốc
+                        fetch(`https://api.counterapi.dev/v1/${namespace}/clicks/down`).catch(() => {});
                     }
-                }).catch(() => {});
+                }).catch(() => { 
+                    globalClicks = 0;
+                    document.getElementById('stat-clicks').innerText = '0'; // Bị adblock chặn cũng hiện 0
+                });
 
-            // Lắng nghe sự kiện click vào các link mạng xã hội để đếm thật
+            // Lắng nghe sự kiện click vào các link
             socialLinks.forEach(link => {
                 link.addEventListener('click', () => {
-                    // Tăng số ngay trên màn hình và lưu vào máy
-                    localClicks++;
-                    localStorage.setItem('andrew_clicks_final', localClicks);
-                    document.getElementById('stat-clicks').innerText = localClicks.toLocaleString();
+                    // Tăng số ngay trên màn hình cho mượt
+                    globalClicks++;
+                    document.getElementById('stat-clicks').innerText = globalClicks.toLocaleString();
 
                     // Gửi lên server
                     fetch(`https://api.counterapi.dev/v1/${namespace}/clicks/up`)
                         .then(res => res.json())
                         .then(data => {
-                            if (data && data.count !== undefined && data.count > localClicks) {
-                                localClicks = data.count;
-                                localStorage.setItem('andrew_clicks_final', localClicks);
-                                document.getElementById('stat-clicks').innerText = localClicks.toLocaleString();
+                            if (data && data.count !== undefined) {
+                                globalClicks = Math.max(globalClicks, data.count); // Đảm bảo luôn đồng bộ số lớn nhất từ máy chủ
+                                document.getElementById('stat-clicks').innerText = globalClicks.toLocaleString();
                             }
                         }).catch(() => {});
                 });
