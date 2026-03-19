@@ -37,7 +37,7 @@
 
         .arcade-effect {
             font-family: 'Press Start 2P', cursive;
-            color: #fef08a; /* Đổi sang màu vàng nhạt */
+            color: #ffffff; /* Đổi sang màu vàng nhạt */
             text-shadow:
                 0 0 0px rgba(254, 240, 138, 0),
                 0 0 0px rgba(254, 240, 138, 0),
@@ -45,14 +45,14 @@
                 0 0 0px rgba(254, 240, 138, 0),
                 3px 3px 0px #d946ef,
                 6px 6px 0px #a855f7,
-                9px 9px 0px #06b6d4,
+                9px 9px 0px #5806d4,
                 12px 12px 20px rgba(0,0,0,0.8);
         }
 
         #weapon-scythe {
             opacity: 0;
             transform-origin: 85% 85%;
-            transform: translate(-40px, 110px) rotate(-30deg) scale(1.2);
+            transform: translate(0px, 20px) rotate(-90deg) scale(1.2);
             filter: blur(10px);
             will-change: transform, opacity, filter;
         }
@@ -60,7 +60,7 @@
         @keyframes scythe-slash {
             0% {
                 opacity: 0;
-                transform: translate(-40px, 110px) rotate(-30deg) scale(1.2);
+                transform: translate(0px, 20px) rotate(-90deg) scale(1.2);
                 filter: blur(10px);
             }
             25% {
@@ -118,7 +118,7 @@
                     0 0 0px rgba(254, 240, 138, 0),
                     3px 3px 0px #d946ef,
                     6px 6px 0px #a855f7,
-                    9px 9px 0px #06b6d4,
+                    9px 9px 0px #5806d4,
                     12px 12px 20px rgba(0,0,0,0.8);
             }
             100% {
@@ -129,7 +129,7 @@
                     0 0 80px rgba(254, 240, 138, 0.2),
                     3px 3px 0px #d946ef,
                     6px 6px 0px #a855f7,
-                    9px 9px 0px #06b6d4,
+                    9px 9px 0px #5806d4,
                     12px 12px 20px rgba(0,0,0,0.8);
             }
         }
@@ -166,8 +166,10 @@
         <source src="Castorice1.webm" type="video/webm">
     </video>
 
-    <div id="main-panel" class="bg-purple-900/60 sm:bg-purple-900/40 backdrop-blur-sm sm:backdrop-blur-md border border-purple-400/20 p-5 sm:p-7 md:p-8 rounded-xl shadow-2xl text-center w-[92%] max-w-[22rem] sm:max-w-[420px] md:max-w-[480px] lg:max-w-[540px] relative z-10 mb-24 sm:mb-0 mt-6 sm:mt-0 opacity-0 translate-y-8 transition-all duration-1000 ease-out">
-        <div class="relative w-full flex justify-center items-center h-16 sm:h-24 md:h-28">
+    <div id="main-panel" class="bg-purple-900/60 sm:bg-purple-900/40 backdrop-blur-sm sm:backdrop-blur-md border border-purple-400/20 p-5 sm:p-7 md:p-8 rounded-xl shadow-2xl text-center w-[92%] max-w-[22rem] sm:max-w-[420px] md:max-w-[480px] lg:max-w-[540px] relative z-10 mb-24 sm:mb-0 mt-12 sm:mt-0 opacity-0 translate-y-8 transition-all duration-1000 ease-out">
+        
+        <!-- Chữ Andrew và Hiệu ứng đâm xuyên viền trên -->
+        <div class="absolute top-0 left-0 -translate-y-1/2 w-full flex justify-center items-center h-16 sm:h-24 md:h-28 z-30">
             <!-- Điểm neo 1: Lưỡi Hái khóa vào tâm -->
             <div class="absolute top-1/2 left-1/2 w-0 h-0 flex justify-center items-center z-20 pointer-events-none">
                 <img id="weapon-scythe" src="weapon.png" alt="Scythe" class="w-56 h-56 sm:w-72 sm:h-72 md:w-80 md:h-80 drop-shadow-2xl max-w-none">
@@ -182,7 +184,8 @@
                 <div id="slash-trail" class="w-[250px] sm:w-[350px] h-2 shrink-0 bg-fuchsia-300 shadow-[0_0_20px_2px_#d946ef] rounded-full opacity-0 origin-center"></div>
             </div>
         </div>
-        <p class="text-purple-100 mb-4 sm:mb-5 text-sm sm:text-base leading-relaxed font-['Nunito'] font-semibold tracking-wide px-2">
+        
+        <p class="text-purple-100 mt-2 sm:mt-4 md:mt-6 mb-4 sm:mb-5 text-sm sm:text-base leading-relaxed font-['Nunito'] font-semibold tracking-wide px-2">
             Software Developer - Student at HUCE<br>Tôi yêu Castorice
         </p>
         <div class="links flex justify-center gap-3 sm:gap-4 md:gap-5 flex-wrap">
@@ -204,6 +207,11 @@
             <a href="https://open.spotify.com/user/31mjhrltj3i7fqkot2ookcegnqwa?si=52405a6d8fd04a4c" class="flex items-center justify-center bg-purple-800/50 border border-purple-400/30 text-purple-200 hover:text-white p-3 sm:p-3.5 rounded-full transition-all duration-700 ease-out transform hover:-translate-y-1 shadow-lg hover:shadow-purple-500/50 backdrop-blur-sm opacity-0 translate-y-8" title="Spotify" target="_blank" rel="noopener noreferrer">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 sm:w-6 sm:h-6">
                     <path d="M12 2C6.477 2 2 6.477 2 12c0 5.523 4.477 10 10 10 5.522 0 10-4.477 10-10C22 6.477 17.522 2 12 2zm4.586 14.424c-.18.295-.563.387-.857.207-2.35-1.434-5.305-1.76-8.786-.963-.335.077-.67-.133-.746-.467-.077-.334.132-.67.466-.745 3.816-.874 7.07-.497 9.715 1.115.293.18.386.563.208.853zm1.22-3.245c-.226.367-.7.482-1.066.257-2.695-1.656-6.83-2.138-9.974-1.168-.41.124-.844-.105-.968-.515-.124-.41.106-.843.516-.968 3.593-1.107 8.163-.568 11.236 1.328.366.226.48.7.256 1.066zm.052-3.41c-3.226-1.914-8.543-2.09-11.616-1.157-.495.15-1.018-.128-1.168-.623-.15-.494.128-1.017.623-1.167 3.53-1.07 9.404-.866 13.115 1.337.445.264.59.838.327 1.282-.265.443-.838.588-1.282.327z"/>
+                </svg>
+            </a>
+            <a href="https://www.linkedin.com/in/nguyenquyenwork/" class="flex items-center justify-center bg-purple-800/50 border border-purple-400/30 text-purple-200 hover:text-white p-3 sm:p-3.5 rounded-full transition-all duration-700 ease-out transform hover:-translate-y-1 shadow-lg hover:shadow-purple-500/50 backdrop-blur-sm opacity-0 translate-y-8" title="LinkedIn" target="_blank" rel="noopener noreferrer">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 sm:w-6 sm:h-6">
+                    <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
                 </svg>
             </a>
         </div>
