@@ -221,12 +221,28 @@ setInterval(updateDiscordStatus, 30000);
 
 const cursor = document.getElementById('custom-cursor');
 let currentCursorSrc = 'default.gif';
+let mouseX = 0, mouseY = 0;
+let cursorVisible = false;
+
+// Vòng lặp đồng bộ hóa việc render chuột với tần số quét màn hình
+const renderCursor = () => {
+    if (cursorVisible) {
+        cursor.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0)`;
+    }
+    requestAnimationFrame(renderCursor);
+};
+requestAnimationFrame(renderCursor);
 
 document.addEventListener('mousemove', (e) => {
     if (window.matchMedia("(pointer: coarse)").matches) return;
     
-    cursor.style.display = 'block';
-    cursor.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    
+    if (!cursorVisible) {
+        cursor.style.display = 'block';
+        cursorVisible = true;
+    }
     
     if (e.target.closest('a, button, #spotify-widget')) {
         if (currentCursorSrc !== 'pointer.gif') { cursor.src = 'pointer.gif'; currentCursorSrc = 'pointer.gif'; }
@@ -236,4 +252,5 @@ document.addEventListener('mousemove', (e) => {
 });
 document.addEventListener('mouseleave', () => {
     cursor.style.display = 'none';
+    cursorVisible = false;
 });
