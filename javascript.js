@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 1600);
     }, andrewDelay);
 
-    const namespace = 'andrew_stats_perfect_v2'; // Đổi đuôi thành v2 để tạo bộ đếm mới hoàn toàn
+    const namespace = 'andrew_stats_perfect_v3'; // Đổi sang v3 và gọi trực tiếp API
     
     // Hàm tạo hiệu ứng đếm số chạy mượt mà
     const animateValue = (obj, start, end, duration) => {
@@ -66,44 +66,49 @@ document.addEventListener('DOMContentLoaded', () => {
         if (el) animateValue(el, 0, count, 2500); // Thời gian chạy là 2.5 giây
     };
     
-    // Hàm bọc URL qua Trạm trung chuyển Proxy để vượt tường lửa CORS trên Vercel
-    const proxyUrl = (path) => `https://corsproxy.io/?${encodeURIComponent(`https://api.counterapi.dev/v1/${namespace}${path}?t=${Date.now()}`)}`;
-    
-    // Tăng lượt xem mỗi khi tải lại trang (như cũ)
-    fetch(proxyUrl('/views/up'))
+    let globalViews = parseInt(localStorage.getItem('andrew_views') || '0');
+    // Tăng lượt xem trực tiếp (không qua Proxy)
+    fetch(`https://api.counterapi.dev/v1/${namespace}/views/up`)
         .then(res => res.json())
         .then(data => {
-            updateViewsAnimated(data.count || 1);
+            globalViews = Math.max(globalViews, data.count || 1);
+            localStorage.setItem('andrew_views', globalViews);
+            updateViewsAnimated(globalViews);
         })
         .catch(() => {
-            updateViewsAnimated(1);
+            globalViews = Math.max(globalViews, 1);
+            updateViewsAnimated(globalViews);
         });
 
-    let globalClicks = 0;
-    fetch(proxyUrl('/clicks/up'))
-        .then(res => res.json())
+    let globalClicks = parseInt(localStorage.getItem('andrew_clicks') || '0');
+    // Lấy số click hiện tại (không tăng thêm)
+    fetch(`https://api.counterapi.dev/v1/${namespace}/clicks`)
+        .then(res => {
+            if (!res.ok) return { count: 0 };
+            return res.json();
+        })
         .then(data => {
             if (data && data.count !== undefined) {
-                globalClicks = Math.max(0, data.count - 1);
-                animateValue(document.getElementById('stat-clicks'), 0, globalClicks, 2500); // Áp dụng cho cả Click
-                
-                fetch(proxyUrl('/clicks/down')).catch(() => {});
+                globalClicks = Math.max(globalClicks, data.count);
+                localStorage.setItem('andrew_clicks', globalClicks);
             }
+            animateValue(document.getElementById('stat-clicks'), 0, globalClicks, 2500); // Áp dụng cho cả Click
         }).catch(() => { 
-            globalClicks = 0;
-            animateValue(document.getElementById('stat-clicks'), 0, 0, 2500);
+            animateValue(document.getElementById('stat-clicks'), 0, globalClicks, 2500);
         });
 
     socialLinks.forEach(link => {
         link.addEventListener('click', () => {
             globalClicks++;
+            localStorage.setItem('andrew_clicks', globalClicks);
             document.getElementById('stat-clicks').innerText = globalClicks.toLocaleString();
 
-            fetch(proxyUrl('/clicks/up'))
+            fetch(`https://api.counterapi.dev/v1/${namespace}/clicks/up`)
                 .then(res => res.json())
                 .then(data => {
                     if (data && data.count !== undefined) {
                         globalClicks = Math.max(globalClicks, data.count);
+                        localStorage.setItem('andrew_clicks', globalClicks);
                         document.getElementById('stat-clicks').innerText = globalClicks.toLocaleString();
                     }
                 }).catch(() => {});
