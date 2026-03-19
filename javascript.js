@@ -47,37 +47,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const namespace = 'andrew_stats_perfect_v2'; // Đổi đuôi thành v2 để tạo bộ đếm mới hoàn toàn
     
+    // Hàm tạo hiệu ứng đếm số chạy mượt mà
+    const animateValue = (obj, start, end, duration) => {
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            // Thuật toán easing (chậm dần về cuối) để tạo cảm giác tự nhiên
+            const easeOut = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+            obj.innerText = Math.floor(easeOut * (end - start) + start).toLocaleString();
+            if (progress < 1) window.requestAnimationFrame(step);
+        };
+        window.requestAnimationFrame(step);
+    };
+
+    const updateViewsAnimated = (count) => {
+        const el = document.getElementById('stat-views');
+        if (el) animateValue(el, 0, count, 2500); // Thời gian chạy là 2.5 giây
+    };
+    
     // Hàm bọc URL qua Trạm trung chuyển Proxy để vượt tường lửa CORS trên Vercel
     const proxyUrl = (path) => `https://corsproxy.io/?${encodeURIComponent(`https://api.counterapi.dev/v1/${namespace}${path}?t=${Date.now()}`)}`;
     
-    // Lấy IP người dùng để đếm lượt xem duy nhất (Unique Views)
-    fetch('https://api.ipify.org?format=json')
+    // Tăng lượt xem mỗi khi tải lại trang (như cũ)
+    fetch(proxyUrl('/views/up'))
         .then(res => res.json())
-        .then(ipData => {
-            // Chuyển địa chỉ IP (IPv4, IPv6) thành dạng chuỗi an toàn để làm key (VD: 192.168.1.1 -> ip_192_168_1_1)
-            const safeIpKey = 'ip_' + ipData.ip.replace(/[\.\:]/g, '_'); 
-            
-            // Kiểm tra IP này đã từng truy cập chưa
-            fetch(proxyUrl(`/${safeIpKey}`))
-                .then(res => res.json())
-                .then(checkData => {
-                    if (checkData && checkData.count > 0) {
-                        // IP đã xem rồi -> Chỉ lấy tổng số view hiện tại để hiển thị, KHÔNG CỘNG THÊM
-                        fetch(proxyUrl('/views')).then(r => r.json()).then(d => document.getElementById('stat-views').innerText = (d.count || 1).toLocaleString()).catch(() => document.getElementById('stat-views').innerText = '1');
-                    } else {
-                        // IP mới -> Đánh dấu IP này và CỘNG THÊM 1 vào view tổng
-                        fetch(proxyUrl(`/${safeIpKey}/up`)).catch(()=> {});
-                        fetch(proxyUrl('/views/up')).then(r => r.json()).then(d => document.getElementById('stat-views').innerText = (d.count || 1).toLocaleString()).catch(() => document.getElementById('stat-views').innerText = '1');
-                    }
-                })
-                .catch(() => {
-                    // Fallback 1: Bị chặn CORS khi kiểm tra IP, tự động lấy view tổng
-                    fetch(proxyUrl('/views')).then(r => r.json()).then(d => document.getElementById('stat-views').innerText = (d.count || 1).toLocaleString()).catch(() => document.getElementById('stat-views').innerText = '1');
-                });
+        .then(data => {
+            updateViewsAnimated(data.count || 1);
         })
         .catch(() => {
-            // Fallback 2: Lỗi mạng không lấy được IP thì lấy tổng số view
-            fetch(proxyUrl('/views')).then(r => r.json()).then(d => document.getElementById('stat-views').innerText = (d.count || 1).toLocaleString()).catch(() => document.getElementById('stat-views').innerText = '1');
+            updateViewsAnimated(1);
         });
 
     let globalClicks = 0;
@@ -86,13 +85,13 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(data => {
             if (data && data.count !== undefined) {
                 globalClicks = Math.max(0, data.count - 1);
-                document.getElementById('stat-clicks').innerText = globalClicks.toLocaleString();
+                animateValue(document.getElementById('stat-clicks'), 0, globalClicks, 2500); // Áp dụng cho cả Click
                 
                 fetch(proxyUrl('/clicks/down')).catch(() => {});
             }
         }).catch(() => { 
             globalClicks = 0;
-            document.getElementById('stat-clicks').innerText = '0';
+            animateValue(document.getElementById('stat-clicks'), 0, 0, 2500);
         });
 
     socialLinks.forEach(link => {
