@@ -49,53 +49,19 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Số liệu mặc định cộng thêm (để bù lại số view/click từ các bản cũ)
     const baseViews = 150; 
-    const baseClicks = 42; 
     
-    // Tăng lượt xem trực tiếp (không qua Proxy)
-    fetch(`https://api.counterapi.dev/v1/${namespace}/views/up`)
+    // 1. TĂNG VÀ LẤY LƯỢT XEM TRANG (PAGE VIEWS)
+    fetch(`https://api.counterapi.dev/v1/${namespace}/views/up?t=${Date.now()}`, { cache: 'no-store' })
         .then(res => res.json())
         .then(data => {
-            const currentViews = (data.count || 1) + baseViews;
-            document.getElementById('stat-views').innerText = currentViews.toLocaleString();
+            const currentViews = (data.count || 0) + baseViews;
+            const viewElement = document.getElementById('stat-views');
+            if (viewElement) viewElement.innerText = currentViews.toLocaleString();
         })
         .catch(() => {
-            document.getElementById('stat-views').innerText = (1 + baseViews).toLocaleString();
+            const viewElement = document.getElementById('stat-views');
+            if (viewElement) viewElement.innerText = (1 + baseViews).toLocaleString();
         });
-
-    let globalClicks = parseInt(localStorage.getItem('andrew_clicks') || '0');
-    // Lấy số click hiện tại (không tăng thêm)
-    fetch(`https://api.counterapi.dev/v1/${namespace}/clicks`)
-        .then(res => {
-            if (!res.ok) return { count: 0 };
-            return res.json();
-        })
-        .then(data => {
-            if (data && data.count !== undefined) {
-                globalClicks = Math.max(globalClicks, data.count + baseClicks);
-                localStorage.setItem('andrew_clicks', globalClicks);
-            }
-            document.getElementById('stat-clicks').innerText = globalClicks.toLocaleString();
-        }).catch(() => { 
-            document.getElementById('stat-clicks').innerText = globalClicks.toLocaleString();
-        });
-
-    socialLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            globalClicks++;
-            localStorage.setItem('andrew_clicks', globalClicks);
-            document.getElementById('stat-clicks').innerText = globalClicks.toLocaleString();
-
-            fetch(`https://api.counterapi.dev/v1/${namespace}/clicks/up`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data && data.count !== undefined) {
-                        globalClicks = Math.max(globalClicks, data.count);
-                        localStorage.setItem('andrew_clicks', globalClicks);
-                        document.getElementById('stat-clicks').innerText = globalClicks.toLocaleString();
-                    }
-                }).catch(() => {});
-        });
-    });
 });
 
 const discordId = '582876202222747679';
